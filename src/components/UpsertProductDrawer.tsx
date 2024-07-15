@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { Button, Divider, Drawer, TextField, Typography } from "@mui/material";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -17,7 +17,15 @@ const UpsertProductDrawer: React.FC<Props> = (props) => {
   const dispatch = useAppDispatch();
   const allProducts = useAppSelector((state) => state?.product?.allProducts);
 
-  const formik = useFormik({
+  const {
+    values,
+    handleBlur,
+    handleChange,
+    errors,
+    touched,
+    resetForm,
+    handleSubmit,
+  } = useFormik({
     initialValues: {
       id: props?.editId ?? 0,
       description: props?.editId
@@ -46,11 +54,32 @@ const UpsertProductDrawer: React.FC<Props> = (props) => {
       price: Yup.number().required("Required"),
       quantity: Yup.number().required("Required"),
     }),
-    onSubmit: () => {},
+    onSubmit: () => {
+      if (props?.action === "create") {
+        dispatch(
+          addProduct({
+            id: Math.random() * 1000,
+            name: values.name!,
+            description: values.description!,
+            price: values.price!,
+            quantity: values.quantity!,
+          })
+        );
+      } else {
+        dispatch(
+          updateProduct({
+            id: values?.id,
+            name: values.name!,
+            description: values.description!,
+            price: values.price!,
+            quantity: values.quantity!,
+          })
+        );
+      }
+      props.onClose();
+      resetForm();
+    },
   });
-
-  const { values, handleBlur, handleChange, errors, touched, resetForm } =
-    formik;
 
   return (
     <Drawer anchor="right" open={props.open} onClose={props.onClose}>
@@ -121,34 +150,7 @@ const UpsertProductDrawer: React.FC<Props> = (props) => {
           >
             Cancel
           </Button>
-          <Button
-            variant="contained"
-            onClick={() => {
-              if (props?.action === "create") {
-                dispatch(
-                  addProduct({
-                    id: Math.random() * 1000,
-                    name: values.name!,
-                    description: values.description!,
-                    price: values.price!,
-                    quantity: values.quantity!,
-                  })
-                );
-              } else {
-                dispatch(
-                  updateProduct({
-                    id: values?.id,
-                    name: values.name!,
-                    description: values.description!,
-                    price: values.price!,
-                    quantity: values.quantity!,
-                  })
-                );
-              }
-              props.onClose();
-              resetForm();
-            }}
-          >
+          <Button variant="contained" onClick={() => handleSubmit()}>
             Save
           </Button>
         </div>
@@ -157,4 +159,4 @@ const UpsertProductDrawer: React.FC<Props> = (props) => {
   );
 };
 
-export default UpsertProductDrawer;
+export default memo(UpsertProductDrawer);

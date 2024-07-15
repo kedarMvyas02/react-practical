@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { memo, useCallback, useState } from "react";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -19,9 +19,11 @@ interface Props {
 const ProductList: React.FC<Props> = (props) => {
   const dispatch = useAppDispatch();
 
-  const [state, setState] = useState({
-    drawerOpenId: 0,
-  });
+  const [drawerOpenId, setDrawerOpenId] = useState(0);
+
+  const handleDrawerOnClose = useCallback(() => {
+    setDrawerOpenId(0);
+  }, []);
 
   return (
     <div>
@@ -51,9 +53,7 @@ const ProductList: React.FC<Props> = (props) => {
                 <TableCell align="right" className="flex">
                   <Button
                     variant="outlined"
-                    onClick={() =>
-                      setState((prev) => ({ ...prev, drawerOpenId: row.id }))
-                    }
+                    onClick={() => setDrawerOpenId(row.id)}
                   >
                     Edit
                   </Button>
@@ -73,13 +73,13 @@ const ProductList: React.FC<Props> = (props) => {
       </TableContainer>
 
       <UpsertProductDrawer
-        open={!!state.drawerOpenId}
-        onClose={() => setState((prev) => ({ ...prev, drawerOpenId: 0 }))}
+        open={!!drawerOpenId}
+        onClose={handleDrawerOnClose}
         action="edit"
-        editId={state.drawerOpenId}
+        editId={drawerOpenId}
       />
     </div>
   );
 };
 
-export default ProductList;
+export default memo(ProductList);

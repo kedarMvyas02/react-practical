@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import ProductList from "./components/ProductList";
 import { fetchAllProducts } from "./store/productSlice";
 import { useAppDispatch, useAppSelector } from "./store";
@@ -67,6 +67,10 @@ function App() {
     }
   }, []);
 
+  const handleDrawerOnClose = useCallback(() => {
+    setState((prev) => ({ ...prev, drawerOpen: false }));
+  }, []);
+
   return (
     <div>
       <div className="flex justify-between p-4">
@@ -104,10 +108,11 @@ function App() {
           Create New Product
         </Button>
       </div>
+
       <ProductList allProducts={filteredAppProducts} />
       <UpsertProductDrawer
         open={state.drawerOpen}
-        onClose={() => setState((prev) => ({ ...prev, drawerOpen: false }))}
+        onClose={handleDrawerOnClose}
         action="create"
       />
     </div>
